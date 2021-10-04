@@ -1,0 +1,135 @@
+version: '2.2'
+services:
+# PROMETHEUS ==============================================================================
+  falcon-prometheus:
+    image: prom/prometheus:latest
+    container_name: falcon-prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+    volumes:
+      - ../config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+     - 5900:9090
+# =========================================
+  falcon-render:
+    container_name: falcon-render
+    image: governify/render:develop
+    environment:
+      - NODE_ENV=development
+      - PORT=5100
+      - LOGIN_USER=${LOGIN_USER:?}
+      - LOGIN_PASSWORD=${LOGIN_PASSWORD:?}
+      - DEFAULT_VIEW=http://host.docker.internal:5200/api/v1/public/renders/index/view.html
+      - DEFAULT_CONTROLLER=http://host.docker.internal:5200/api/v1/public/renders/index/controller.js
+      - DEFAULT_MODEL=http://host.docker.internal:5200/api/v1/public/renders/index/model.json
+      - GOV_INFRASTRUCTURE=${GOV_INFRASTRUCTURE:?}
+      - LAYOUT=bootstrap5.html
+    ports:
+      - 5100:5100
+    depends_on:
+      - falcon-assets-manager
+# =========================================
+  falcon-assets-manager:
+    container_name: falcon-assets-manager
+    image: 'governify/assets-manager:develop'
+    environment:
+      - NODE_ENV=production
+      - PORT=5200
+      - LOGIN_USER=${LOGIN_USER:?}
+      - LOGIN_PASSWORD=${LOGIN_PASSWORD:?}
+      - SERVICES_PREFIX=${SERVICES_PREFIX:?}
+      - DNS_SUFFIX=${DNS_SUFFIX:?}
+      - ASSETS_REPOSITORY=https://github.com/governify/assets-falcon
+      - ASSETS_REPOSITORY_BRANCH=${ASSETS_REPOSITORY_BRANCH:?}
+      - GOV_INFRASTRUCTURE=/home/project/public/infrastructure-local.yaml
+    volumes:
+      - 'falcon-db-backups:/home/project/public/database/backups'
+    mem_limit: 900m
+    restart: 'unless-stopped'
+    ports:
+      - 5200:5200
+# =========================================
+  falcon-reporter:
+    container_name: falcon-reporter
+    image: governify/reporter:develop
+    environment:
+      - NODE_ENV=development
+      - PORT=5300
+      - DB_HOST=influxdb
+      - GOV_INFRASTRUCTURE=${GOV_INFRASTRUCTURE:?}
+    depends_on:
+      - falcon-influx-reporter
+      - falcon-assets-manager
+    ports:
+      - 5300:5300
+# =========================================
+  falcon-influx-reporter:
+    container_name: falcon-influx-reporter
+    image: 'influxdb:1.8.4-alpine'
+    volumes:
+      - 'falcon-influxdb-volume:/var/lib/influxdb'
+    ports:
+      - 5002:8086
+# =========================================
+  falcon-registry:
+    container_name: falcon-registry
+    image: 'governify/registry:develop'
+    environment:
+      - NODE_ENV=development
+      - PORT=5400
+      - DB_HOST=mongo_registry
+      - GOV_INFRASTRUCTURE=${GOV_INFRASTRUCTURE:?}
+    depends_on:
+      - falcon-assets-manager
+      - falcon-mongo-registry
+    ports:
+      - 5400:5400
+# =========================================
+  falcon-mongo-registry:
+    container_name: falcon-mongo-registry
+    image: mongo
+    volumes:
+      - 'falcon-registry-db-volume:/data/db'
+    ports:
+      - 5001:27017
+# =========================================
+  falcon-collector-dynamic:
+    container_name: falcon-collector-dynamic
+    image: 'governify/collector-dynamic:develop'
+    environment:
+      - NODE_ENV=development
+      - PORT=5501
+      - GOV_INFRASTRUCTURE=${GOV_INFRASTRUCTURE:?}
+    mem_limit: 400m
+    depends_on:
+      - falcon-assets-manager
+    ports:
+      - 5501:5501
+# =========================================
+  falcon-dashboard:
+    container_name: falcon-dashboard
+    image: governify/dashboard:develop
+    environment:
+      - NODE_ENV=development
+      - GOV_INFRASTRUCTURE=${GOV_INFRASTRUCTURE:?}
+      - INFLUX_URL=http://host.docker.internal:5002
+      - GF_PATHS_PLUGINS=/usr/share/grafana/plugins
+    ports:
+      - 5600:3000
+# =========================================
+  falcon-director:
+    container_name: falcon-director
+    image: 'governify/director:develop'
+    environment:
+      - NODE_ENV=development
+      - PORT=5800
+      - GOV_INFRASTRUCTURE=${GOV_INFRASTRUCTURE:?}
+    mem_limit: 400m
+    depends_on:
+      - falcon-assets-manager
+    ports:
+      - 5800:5800
+volumes:
+  falcon-influxdb-volume: null
+  falcon-registry-db-volume: null
+  falcon-db-backups: null

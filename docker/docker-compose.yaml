@@ -1,0 +1,168 @@
+version: '2.2'
+services:
+# PROMETHEUS ==============================================================================
+  falcon-prometheus:
+    image: prom/prometheus:latest
+    container_name: falcon-prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+    volumes:
+      - ../config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    networks:
+      - governify-falcon
+# NGINX AND CERTS ==============================================================================
+  certbot:
+    image: certbot/certbot
+    restart: unless-stopped
+    volumes:
+      - ../data/certbot/conf:/etc/letsencrypt
+      - ../data/certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+  falcon-nginx:
+    environment:
+      - FALCON_SERVICES_PREFIX=${SERVICES_PREFIX:?}
+      - FALCON_DNS_SUFFIX=${DNS_SUFFIX:?}
+    container_name: falcon-nginx
+    image: nginx
+    ports:
+      - '443:443'
+      - '80:80'
+    ulimits:
+      nproc: 10240
+      nofile:
+        soft: 10240
+        hard: 10240
+    volumes:
+      - '../config/nginx.conf:/etc/nginx/nginx.conf'
+      - '../data/certbot/conf:/etc/letsencrypt'
+      - '../config/static:/etc/nginx/static'
+      - '../certs:/etc/nginx/certs'
+      - '../config/services-nginx-config:/etc/nginx/templates'
+      - '../logs/bouncer-nginx:/var/log/nginx'
+      - '../data/certbot/www:/var/www/certbot'
+    networks:
+      - governify-falcon
+# =========================================
+  falcon-render:
+    container_name: falcon-render
+    image: governify/render:develop
+    environment:
+      - NODE_ENV=production
+      - PORT=80
+      - LOGIN_USER=${LOGIN_USER:?}
+      - LOGIN_PASSWORD=${LOGIN_PASSWORD:?}
+      - DEFAULT_VIEW=http://falcon-assets-manager/api/v1/public/renders/index/view.html
+      - DEFAULT_CONTROLLER=http://falcon-assets-manager/api/v1/public/renders/index/controller.js
+      - DEFAULT_MODEL=http://falcon-assets-manager/api/v1/public/renders/index/model.json
+      - GOV_INFRASTRUCTURE=${GOV_INFRASTRUCTURE:?}
+      - LAYOUT=bootstrap5.html
+    networks:
+      - governify-falcon
+    depends_on:
+      - falcon-assets-manager
+# =========================================
+  falcon-assets-manager:
+    container_name: falcon-assets-manager
+    image: 'governify/assets-manager:develop'
+    environment:
+      - NODE_ENV=production
+      - PORT=80
+      - LOGIN_USER=${LOGIN_USER:?}
+      - LOGIN_PASSWORD=${LOGIN_PASSWORD:?}
+      - SERVICES_PREFIX=${SERVICES_PREFIX:?}
+      - DNS_SUFFIX=${DNS_SUFFIX:?}
+      - ASSETS_REPOSITORY=https://github.com/governify/assets-falcon
+      - ASSETS_REPOSITORY_BRANCH=${ASSETS_REPOSITORY_BRANCH:?}
+    networks:
+      - governify-falcon
+    volumes:
+      - 'falcon-db-backups:/home/project/public/database/backups'
+    mem_limit: 900m
+    restart: 'unless-stopped'
+# =========================================
+  falcon-reporter:
+    container_name: falcon-reporter
+    image: governify/reporter:develop
+    environment:
+      - NODE_ENV=production
+      - PORT=80
+      - DB_HOST=influxdb
+      - GOV_INFRASTRUCTURE=${GOV_INFRASTRUCTURE:?}
+    networks:
+      - governify-falcon
+    depends_on:
+      - falcon-influx-reporter
+      - falcon-assets-manager
+# =========================================
+  falcon-influx-reporter:
+    container_name: falcon-influx-reporter
+    image: 'influxdb:1.8.4-alpine'
+    volumes:
+      - 'falcon-influxdb-volume:/var/lib/influxdb'
+    networks:
+      - governify-falcon
+# =========================================
+  falcon-registry:
+    container_name: falcon-registry
+    image: 'governify/registry:develop'
+    networks:
+      - governify-falcon
+    environment:
+      - NODE_ENV=production
+      - PORT=80
+      - GOV_INFRASTRUCTURE=${GOV_INFRASTRUCTURE:?}
+    depends_on:
+      - falcon-assets-manager
+      - falcon-mongo-registry
+# =========================================
+  falcon-mongo-registry:
+    container_name: falcon-mongo-registry
+    image: mongo
+    networks:
+      - governify-falcon
+    volumes:
+      - 'falcon-registry-db-volume:/data/db'
+# =========================================
+  falcon-collector-dynamic:
+    container_name: falcon-collector-dynamic
+    image: 'governify/collector-dynamic:develop'
+    networks:
+      - governify-falcon
+    environment:
+      - NODE_ENV=production
+      - PORT=80
+      - GOV_INFRASTRUCTURE=${GOV_INFRASTRUCTURE:?}
+    mem_limit: 400m
+    depends_on:
+      - falcon-assets-manager
+# =========================================
+  falcon-dashboard:
+    container_name: falcon-dashboard
+    image: governify/dashboard:develop
+    environment:
+      - NODE_ENV=production
+      - GOV_INFRASTRUCTURE=${GOV_INFRASTRUCTURE:?}
+      - INFLUX_URL=http://falcon-influx-reporter:8086
+      - GF_PATHS_PLUGINS=/usr/share/grafana/plugins
+    networks:
+      - governify-falcon
+# =========================================
+  falcon-director:
+    container_name: falcon-director
+    image: 'governify/director:develop'
+    networks:
+      - governify-falcon
+    environment:
+      - NODE_ENV=production
+      - PORT=80
+      - GOV_INFRASTRUCTURE=${GOV_INFRASTRUCTURE:?}
+    mem_limit: 400m
+    depends_on:
+      - falcon-assets-manager
+volumes:
+  falcon-influxdb-volume: null
+  falcon-registry-db-volume: null
+  falcon-db-backups: null
+networks:
+  governify-falcon:
+    external: true
