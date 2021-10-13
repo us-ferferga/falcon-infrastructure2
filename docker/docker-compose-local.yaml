@@ -72,6 +72,7 @@ services:
       - 'falcon-influxdb-volume:/var/lib/influxdb'
     ports:
       - 5002:8086
+      - 8088:8088
 # =========================================
   falcon-registry:
     container_name: falcon-registry
