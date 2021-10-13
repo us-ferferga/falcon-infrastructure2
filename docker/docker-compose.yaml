@@ -97,6 +97,8 @@ services:
   falcon-influx-reporter:
     container_name: falcon-influx-reporter
     image: 'influxdb:1.8.4-alpine'
+    environment:
+      - INFLUXDB_BIND_ADDRESS=:8088
     volumes:
       - 'falcon-influxdb-volume:/var/lib/influxdb'
     networks:
@@ -156,6 +158,7 @@ services:
       - NODE_ENV=production
       - PORT=80
       - GOV_INFRASTRUCTURE=${GOV_INFRASTRUCTURE:?}
+      - INFLUXDB_BIND_ADDRESS=:8088
     mem_limit: 400m
     depends_on:
       - falcon-assets-manager
