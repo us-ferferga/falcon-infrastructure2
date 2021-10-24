@@ -71,6 +71,7 @@ services:
       - LOGIN_PASSWORD=${LOGIN_PASSWORD:?}
       - SERVICES_PREFIX=${SERVICES_PREFIX:?}
       - DNS_SUFFIX=${DNS_SUFFIX:?}
+      - PRIVATE_KEY=${KEY_ASSETS_MANAGER_PRIVATE:?}
       - ASSETS_REPOSITORY=https://github.com/governify/assets-falcon
       - ASSETS_REPOSITORY_BRANCH=${ASSETS_REPOSITORY_BRANCH:?}
     networks:
