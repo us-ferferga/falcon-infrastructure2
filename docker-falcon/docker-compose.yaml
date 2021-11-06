@@ -45,7 +45,7 @@ services:
 # =========================================
   falcon-render:
     container_name: falcon-render
-    image: governify/render:develop
+    image: governify/render:2.2.0
     environment:
       - NODE_ENV=production
       - PORT=80
@@ -63,7 +63,7 @@ services:
 # =========================================
   falcon-assets-manager:
     container_name: falcon-assets-manager
-    image: 'governify/assets-manager:develop'
+    image: 'governify/assets-manager:1.4.1'
     environment:
       - NODE_ENV=production
       - PORT=80
@@ -77,13 +77,13 @@ services:
     networks:
       - governify-falcon
     volumes:
-      - 'falcon-db-backups:/home/project/public/database/backups'
+      - '../assets:/home/project'
     mem_limit: 900m
     restart: 'unless-stopped'
 # =========================================
   falcon-reporter:
     container_name: falcon-reporter
-    image: governify/reporter:develop
+    image: governify/reporter:2.2.0
     environment:
       - NODE_ENV=production
       - PORT=80
@@ -107,7 +107,7 @@ services:
 # =========================================
   falcon-registry:
     container_name: falcon-registry
-    image: 'governify/registry:develop'
+    image: 'governify/registry:3.4.0'
     networks:
       - governify-falcon
     environment:
@@ -128,7 +128,7 @@ services:
 # =========================================
   falcon-collector-dynamic:
     container_name: falcon-collector-dynamic
-    image: 'governify/collector-dynamic:develop'
+    image: 'governify/collector-dynamic:1.3.0'
     networks:
       - governify-falcon
     environment:
@@ -141,7 +141,7 @@ services:
 # =========================================
   falcon-dashboard:
     container_name: falcon-dashboard
-    image: governify/dashboard:develop
+    image: governify/dashboard:latest
     environment:
       - NODE_ENV=production
       - GOV_INFRASTRUCTURE=${GOV_INFRASTRUCTURE:?}
@@ -152,7 +152,7 @@ services:
 # =========================================
   falcon-director:
     container_name: falcon-director
-    image: 'governify/director:develop'
+    image: 'governify/director:1.4.0'
     networks:
       - governify-falcon
     environment:
@@ -166,7 +166,6 @@ services:
 volumes:
   falcon-influxdb-volume: null
   falcon-registry-db-volume: null
-  falcon-db-backups: null
 networks:
   governify-falcon:
     external: true
