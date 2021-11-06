@@ -44,7 +44,7 @@ services:
       - ASSETS_REPOSITORY_BRANCH=${ASSETS_REPOSITORY_BRANCH:?}
       - GOV_INFRASTRUCTURE=/home/project/public/infrastructure-local.yaml
     volumes:
-      - 'falcon-db-backups:/home/project/public/database/backups'
+      - '../assets:/home/project'
     mem_limit: 900m
     restart: 'unless-stopped'
     ports:
@@ -137,4 +137,3 @@ services:
 volumes:
   falcon-influxdb-volume: null
   falcon-registry-db-volume: null
-  falcon-db-backups: null
