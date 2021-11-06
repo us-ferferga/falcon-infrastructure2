@@ -45,7 +45,7 @@ services:
 # =========================================
   falcon-render:
     container_name: falcon-render
-    image: governify/render:2.2.0
+    image: governify/render:v2.2.0
     environment:
       - NODE_ENV=production
       - PORT=80
@@ -63,7 +63,7 @@ services:
 # =========================================
   falcon-assets-manager:
     container_name: falcon-assets-manager
-    image: 'governify/assets-manager:1.4.1'
+    image: 'governify/assets-manager:v1.4.1'
     environment:
       - NODE_ENV=production
       - PORT=80
@@ -83,7 +83,7 @@ services:
 # =========================================
   falcon-reporter:
     container_name: falcon-reporter
-    image: governify/reporter:2.2.0
+    image: governify/reporter:v2.2.0
     environment:
       - NODE_ENV=production
       - PORT=80
@@ -107,7 +107,7 @@ services:
 # =========================================
   falcon-registry:
     container_name: falcon-registry
-    image: 'governify/registry:3.4.0'
+    image: 'governify/registry:v3.4.0'
     networks:
       - governify-falcon
     environment:
@@ -128,7 +128,7 @@ services:
 # =========================================
   falcon-collector-dynamic:
     container_name: falcon-collector-dynamic
-    image: 'governify/collector-dynamic:1.3.0'
+    image: 'governify/collector-dynamic:v1.3.0'
     networks:
       - governify-falcon
     environment:
@@ -152,7 +152,7 @@ services:
 # =========================================
   falcon-director:
     container_name: falcon-director
-    image: 'governify/director:1.4.0'
+    image: 'governify/director:v1.4.0'
     networks:
       - governify-falcon
     environment:
