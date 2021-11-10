@@ -6,6 +6,9 @@ export $(grep -v '^#' .env | xargs)
 # Create bouncer network
 docker network create governify-falcon
 
+# Create assets dir with permissions if it does not exist
+mkdir -p -m 777 assets
+
 # Docker compose
 docker-compose -f ./docker/docker-compose.yaml --env-file .env up -d
 
