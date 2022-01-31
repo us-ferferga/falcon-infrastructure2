@@ -10,7 +10,7 @@ docker network create governify-falcon
 mkdir -p -m 777 assets
 
 # Docker compose
-docker-compose -f ./docker/docker-compose.yaml --env-file .env up -d
+docker-compose -f ./docker-falcon/docker-compose.yaml --env-file .env up -d
 
 # Create dummy certificates
 ./utils/init-letsencrypt.sh 1 1
