@@ -7,7 +7,7 @@ services:
     command:
       - --config.file=/etc/prometheus/prometheus.yml
     volumes:
-      - ../config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ../config/prometheus/:/etc/prometheus/:ro
     networks:
       - governify-falcon
 # NGINX AND CERTS ==============================================================================
