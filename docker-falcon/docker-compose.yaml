@@ -4,10 +4,14 @@ services:
   falcon-prometheus:
     image: prom/prometheus:latest
     container_name: falcon-prometheus
+    depends_on:
+      - falcon-assets-manager
     command:
-      - --config.file=/etc/prometheus/prometheus.yml
+      - --config.file=/etc/prometheus/config.yml
     volumes:
-      - ../config/prometheus/:/etc/prometheus/:ro
+      - ../config/prometheus:/etc/prometheus:ro
+    volumes_from:
+      - falcon-assets-manager:ro
     networks:
       - governify-falcon
 # NGINX AND CERTS ==============================================================================

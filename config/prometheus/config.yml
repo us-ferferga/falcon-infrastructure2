@@ -1,0 +1,7 @@
+scrape_configs:
+- job_name: falcon_prometheus
+  scrape_interval: 5s
+  file_sd_configs:
+  - files:
+    - /home/project/public/prometheus/targets.json
+    refresh_interval: 5s
