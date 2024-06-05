@@ -4,6 +4,13 @@ services:
   falcon-prometheus:
     image: prom/prometheus:latest
     container_name: falcon-prometheus
+    # TODO: REMOVE
+    # Most Governify microservices have a hard-coded reference to the "host.docker.internal" address,
+    # so this is left here to make it work in all systems. This is a hack and all services
+    # must be changed so the dependencies are passed using environment variables, without doing
+    # any assumptions about the user's deployment.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       - falcon-assets-manager
     command:
@@ -18,6 +25,13 @@ services:
   certbot:
     image: certbot/certbot
     restart: unless-stopped
+    # TODO: REMOVE
+    # Most Governify microservices have a hard-coded reference to the "host.docker.internal" address,
+    # so this is left here to make it work in all systems. This is a hack and all services
+    # must be changed so the dependencies are passed using environment variables, without doing
+    # any assumptions about the user's deployment.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - ../data/certbot/conf:/etc/letsencrypt
       - ../data/certbot/www:/var/www/certbot
@@ -50,6 +64,13 @@ services:
   falcon-render:
     container_name: falcon-render
     image: governify/render:v2.2.0
+    # TODO: REMOVE
+    # Most Governify microservices have a hard-coded reference to the "host.docker.internal" address,
+    # so this is left here to make it work in all systems. This is a hack and all services
+    # must be changed so the dependencies are passed using environment variables, without doing
+    # any assumptions about the user's deployment.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       - NODE_ENV=production
       - PORT=80
@@ -68,6 +89,13 @@ services:
   falcon-assets-manager:
     container_name: falcon-assets-manager
     image: 'governify/assets-manager:v1.4.1'
+    # TODO: REMOVE
+    # Most Governify microservices have a hard-coded reference to the "host.docker.internal" address,
+    # so this is left here to make it work in all systems. This is a hack and all services
+    # must be changed so the dependencies are passed using environment variables, without doing
+    # any assumptions about the user's deployment.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       - NODE_ENV=production
       - PORT=80
@@ -88,6 +116,13 @@ services:
   falcon-reporter:
     container_name: falcon-reporter
     image: governify/reporter:v2.2.0
+    # TODO: REMOVE
+    # Most Governify microservices have a hard-coded reference to the "host.docker.internal" address,
+    # so this is left here to make it work in all systems. This is a hack and all services
+    # must be changed so the dependencies are passed using environment variables, without doing
+    # any assumptions about the user's deployment.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       - NODE_ENV=production
       - PORT=80
@@ -102,6 +137,13 @@ services:
   falcon-influx-reporter:
     container_name: falcon-influx-reporter
     image: 'influxdb:1.8.4-alpine'
+    # TODO: REMOVE
+    # Most Governify microservices have a hard-coded reference to the "host.docker.internal" address,
+    # so this is left here to make it work in all systems. This is a hack and all services
+    # must be changed so the dependencies are passed using environment variables, without doing
+    # any assumptions about the user's deployment.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       - INFLUXDB_BIND_ADDRESS=:8088
     volumes:
@@ -112,6 +154,13 @@ services:
   falcon-registry:
     container_name: falcon-registry
     image: 'governify/registry:v3.4.0'
+    # TODO: REMOVE
+    # Most Governify microservices have a hard-coded reference to the "host.docker.internal" address,
+    # so this is left here to make it work in all systems. This is a hack and all services
+    # must be changed so the dependencies are passed using environment variables, without doing
+    # any assumptions about the user's deployment.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - governify-falcon
     environment:
@@ -124,6 +173,13 @@ services:
 # =========================================
   falcon-mongo-registry:
     container_name: falcon-mongo-registry
+    # TODO: REMOVE
+    # Most Governify microservices have a hard-coded reference to the "host.docker.internal" address,
+    # so this is left here to make it work in all systems. This is a hack and all services
+    # must be changed so the dependencies are passed using environment variables, without doing
+    # any assumptions about the user's deployment.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     image: mongo
     networks:
       - governify-falcon
@@ -133,6 +189,13 @@ services:
   falcon-collector-dynamic:
     container_name: falcon-collector-dynamic
     image: 'governify/collector-dynamic:v1.3.0'
+    # TODO: REMOVE
+    # Most Governify microservices have a hard-coded reference to the "host.docker.internal" address,
+    # so this is left here to make it work in all systems. This is a hack and all services
+    # must be changed so the dependencies are passed using environment variables, without doing
+    # any assumptions about the user's deployment.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - governify-falcon
     environment:
@@ -146,6 +209,13 @@ services:
   falcon-dashboard:
     container_name: falcon-dashboard
     image: governify/dashboard:latest
+    # TODO: REMOVE
+    # Most Governify microservices have a hard-coded reference to the "host.docker.internal" address,
+    # so this is left here to make it work in all systems. This is a hack and all services
+    # must be changed so the dependencies are passed using environment variables, without doing
+    # any assumptions about the user's deployment.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       - NODE_ENV=production
       - GOV_INFRASTRUCTURE=${GOV_INFRASTRUCTURE:?}
@@ -157,6 +227,13 @@ services:
   falcon-director:
     container_name: falcon-director
     image: 'governify/director:v1.4.0'
+    # TODO: REMOVE
+    # Most Governify microservices have a hard-coded reference to the "host.docker.internal" address,
+    # so this is left here to make it work in all systems. This is a hack and all services
+    # must be changed so the dependencies are passed using environment variables, without doing
+    # any assumptions about the user's deployment.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - governify-falcon
     environment:
